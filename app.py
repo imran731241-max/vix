@@ -68,7 +68,7 @@ async def visit(session, url, token, uid, data):
         app.logger.error(f"❌ Visit error: {e}")
         return False, None
 
-async def send_until_20_success(tokens, uid, server_name, target_success=10000):
+async def send_until_20_success(tokens, uid, server_name, target_success=1200):
     url = get_url(server_name)
     connector = aiohttp.TCPConnector(limit=0)
     total_success = 0
@@ -81,7 +81,7 @@ async def send_until_20_success(tokens, uid, server_name, target_success=10000):
         data = bytes.fromhex(encrypted)
 
         while total_success < target_success:
-            batch_size = min(target_success - total_success, 1000)
+            batch_size = min(target_success - total_success, 600)
             tasks = [
                 asyncio.create_task(visit(session, url, tokens[(total_sent + i) % len(tokens)], uid, data))
                 for i in range(batch_size)
@@ -107,7 +107,7 @@ async def send_until_20_success(tokens, uid, server_name, target_success=10000):
 def send_visits(server, uid):
     server = server.upper()
     tokens = load_tokens(server)
-    target_success = 10000
+    target_success = 1200
 
     if not tokens:
         return jsonify({"error": "❌ No valid tokens found"}), 500
